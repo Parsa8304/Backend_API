@@ -46,7 +46,7 @@ class Gamer(models.Model):
 ################################################################
 # Seller Properties ->
 
-from django.db import models
+
 
 class Product(models.Model):
     title = models.CharField(max_length=100)

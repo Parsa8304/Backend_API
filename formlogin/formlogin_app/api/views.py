@@ -28,11 +28,12 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data['user']
+            username = serializer.validated_data['username']
+            user_type = serializer.validated_data['user_type']
             context = {
                 'message': 'Login successful',
-                'username': user.username,
-                'user_type' : user.user_type
+                'username': username,
+                'user_type' : user_type
 
             }
             return Response(context, status=status.HTTP_200_OK)
@@ -108,7 +109,7 @@ class ProductCreateView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
 
 
-class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
+class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

@@ -11,7 +11,7 @@ urlpatterns = [
 
     path('online-shops/', OnlineShopListView.as_view(), name='online-shop-list'),
     path('online-shops/create/', OnlineShopCreateView.as_view(), name='online-shop-create'),
-    path('products/', ProductDetailView.as_view(), name='product-list'),
+    path('products/', ProductListView.as_view(), name='product-list'),
     path('products/create/', ProductCreateView.as_view(), name='product-create'),
 
 ]
