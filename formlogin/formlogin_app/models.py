@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 
-
-
 # Creating the CustomUser class so we can have different kinds of users on the platform
 #This class has 3 Children (investor,gamer,seller)
 class CustomUser(AbstractUser):
@@ -29,8 +27,10 @@ class Seller(models.Model):
 
 class Investor(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, limit_choices_to={'user_type': 'investor'})
-    investment = models.DecimalField(max_digits=10, decimal_places=2)
-    portfolio = models.DecimalField(max_digits=10, decimal_places=2)
+    investment = models.DecimalField(max_digits=10, decimal_places=2 ,default=0)
+    def __str__(self):
+        return f"{self.user.username} - {self.user.user_type}"
+    portfolio = models.DecimalField(max_digits=10, decimal_places=2 ,default=0)
 
     def __str__(self):
         return f"{self.user.username} - {self.user.user_type}"
@@ -46,29 +46,32 @@ class Gamer(models.Model):
 ################################################################
 # Seller Properties ->
 
+from django.db import models
+
 class Product(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(decimal_places=2, max_digits=10)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
+    online_shop = models.ForeignKey('OnlineShop', related_name='products', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
 
-
-
 class OnlineShop(models.Model):
+
     name = models.CharField(max_length=100)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     url = models.URLField()
     description = models.TextField()
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
-    customer = models.CharField(max_length=100)
-    sales = models.FloatField(default = 0.00)
-    # logo = models.ImageField()
+    seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
+    customer = models.CharField(max_length=100, default=None)
+    sales = models.FloatField(default=0.00)
+    logo = models.ImageField(default=None)
+
 
     def __str__(self):
         return f"{self.name} - {self.description}"
+
 
 
 

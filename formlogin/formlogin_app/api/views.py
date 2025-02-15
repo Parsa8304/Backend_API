@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 
 
-
+# User Create view
 class UserCreateView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -40,6 +40,27 @@ class LoginAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+#Seeing all users
+class UserListView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset , many = True)  # Ensure correct usage
+        return Response(serializer.data)
+
+
+#seeing Only one user
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+
+#Creating account for any type of user
+###############################################
+
 class SellerListCreateView(generics.ListCreateAPIView):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
@@ -59,3 +80,36 @@ class GamerListCreateView(generics.ListCreateAPIView):
     """
     queryset = Gamer.objects.all()
     serializer_class = GamerSerializer
+
+
+
+
+#adding products
+###################################3
+
+class OnlineShopListView(generics.ListCreateAPIView):
+    queryset = OnlineShop.objects.all()
+    serializer_class = OnlineShopSerializer
+
+    def get(self, request, *args, **kwargs ):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)  # Ensure correct usage
+        return Response(serializer.data)
+
+
+class OnlineShopCreateView(generics.CreateAPIView):
+    queryset = OnlineShop.objects.all()
+    serializer_class = OnlineShopSerializer
+
+
+
+class ProductCreateView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
