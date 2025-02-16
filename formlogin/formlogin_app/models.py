@@ -66,7 +66,7 @@ class OnlineShop(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     customer = models.CharField(max_length=100, default=None)
     sales = models.FloatField(default=0.00)
-    logo = models.ImageField(default=None)
+    logo = models.ImageField(upload_to='logo/',default=None)
 
 
     def __str__(self):
