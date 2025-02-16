@@ -58,6 +58,7 @@ class OnlineShopSerializer(serializers.ModelSerializer):
         model = OnlineShop
         fields =['name',  'url', 'description', 'seller','products',]
 
+#This func represents the OnlineShop name instead of it's id
     def to_representation(self, instance):
         return {
             'id': instance.name,
@@ -84,12 +85,12 @@ class PointsSerializer(serializers.ModelSerializer):
         fields = [ 'points']
 
 class GamerSerializer(serializers.ModelSerializer):
-    level = LevelSerializer(read_only=True)  # Assuming you have a Level model
-    points = PointsSerializer(read_only=True)  # Assuming you have a Points model
+    level = LevelSerializer(read_only=True)
+    points = PointsSerializer(read_only=True)
 
     class Meta:
         model = Gamer
-        fields = ['user', 'level', 'points']  # Include user, level, and points
+        fields = ['user', 'level', 'points']
 
 
 #####################################################
@@ -98,7 +99,7 @@ class GamerSerializer(serializers.ModelSerializer):
 class InvestorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Investor
-        fields = ['user',  'portfolio']  # Include user and investment details
+        fields = ['user',  'portfolio']
 
 
 
