@@ -41,6 +41,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class OnlineShopSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
 
+
     class Meta:
         model = OnlineShop
         fields = ['name', 'url', 'description', 'seller', 'products']
@@ -59,7 +60,7 @@ class SellerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_online_shop(self, obj):
-        online_shops = obj.online_shop_set.all()
+        online_shops = obj.onlineshop_set.all()
         return OnlineShopSerializer(online_shops, many=True).data
 
 ###################################################

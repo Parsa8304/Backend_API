@@ -7,6 +7,8 @@ from .serializers import (CustomUserSerializer, SellerSerializer,ProductSerializ
 from formlogin_app.models import (CustomUser,  Seller, Investor,
                                   Gamer, Product, OnlineShop, Level, Points)
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated ,IsAdminUser
+from .permissions import IsSeller
 
 
 
@@ -28,6 +30,7 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
+            user = serializer.validated_data['user']
             username = serializer.validated_data['username']
             user_type = serializer.validated_data['user_type']
             context = {
@@ -57,7 +60,7 @@ class UserListView(generics.ListAPIView):
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-
+    permission_classes = [permissions.IsAdminUser]
 
 #Creating account for any type of user
 ###############################################
@@ -101,6 +104,7 @@ class OnlineShopListView(generics.ListCreateAPIView):
 class OnlineShopCreateView(generics.CreateAPIView):
     queryset = OnlineShop.objects.all()
     serializer_class = OnlineShopSerializer
+    permission_classes = [IsSeller]
 
 
 

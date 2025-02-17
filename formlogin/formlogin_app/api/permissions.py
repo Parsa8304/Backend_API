@@ -1,6 +1,9 @@
 from rest_framework import permissions
 
 
+####################
+#Todo : An "AdminOrRead" permission should be added here.
+####################
 
 class IsInvestor(permissions.BasePermission):
     def has_permission(self, request, view):
