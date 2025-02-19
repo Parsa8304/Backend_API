@@ -87,6 +87,9 @@ class ProductAnalytics(models.Model):
     clicks = models.IntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.product.title}"
+
 
 
 ###############################################################

@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
 from .permissions import IsSeller
 from rest_framework import viewsets
 
-
+# Todo : comment the authorization stuff in views
+# so we caen test the cod
 
 # User Create view
 class UserCreateView(generics.CreateAPIView):
@@ -118,7 +119,10 @@ class OnlineShopCreateView(generics.CreateAPIView):
 #     queryset = Product.objects.all()
 #     serializer_class = ProductSerializer
 #
-#
+# Todo : this view shold be tested tommorow
+
+
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer

@@ -2,6 +2,9 @@ from django.urls import path , include
 from .views import *
 from rest_framework.routers import DefaultRouter
 
+#Todo : clean up the URL stuff
+
+
 
 router = DefaultRouter()
 router.register('Products', ProductViewSet)
