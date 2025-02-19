@@ -8,6 +8,7 @@ class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     password = serializers.CharField()
 
+
     class Meta:
         model = CustomUser
         fields = ['username', 'password']
@@ -36,7 +37,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['title', 'price', 'description', 'image', 'online_shop', 'onlineshop_name']
+        fields = '__all__'
 
 class OnlineShopSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
@@ -101,5 +102,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'user_type', 'seller', 'gamer', 'investor']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = '__all__'
+
+
+    def create(self, validated_data):
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user

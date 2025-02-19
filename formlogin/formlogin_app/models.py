@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
         ('seller', 'Seller'),
     )
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    password = models.CharField(max_length=128)
     def __str__(self):
         return self.username
 
@@ -49,14 +50,21 @@ class Gamer(models.Model):
 
 
 class Product(models.Model):
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, default=1)
     title = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(decimal_places=2, max_digits=10)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     online_shop = models.ForeignKey('OnlineShop', related_name='products', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.title
+
+    def get_shop_link(self):
+        return f'{self.online_shop.get_absolute_url()}/{self.title}'
 
 class OnlineShop(models.Model):
 
@@ -72,6 +80,12 @@ class OnlineShop(models.Model):
     def __str__(self):
         return f"{self.name} - {self.description}"
 
+
+class ProductAnalytics(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    views = models.IntegerField(default=0)
+    clicks = models.IntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
 
 
 

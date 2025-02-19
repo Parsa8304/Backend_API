@@ -7,9 +7,9 @@ from .serializers import (CustomUserSerializer, SellerSerializer,ProductSerializ
 from formlogin_app.models import (CustomUser,  Seller, Investor,
                                   Gamer, Product, OnlineShop, Level, Points)
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated ,IsAdminUser
+from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
 from .permissions import IsSeller
-
+from rest_framework import viewsets
 
 
 
@@ -17,7 +17,7 @@ from .permissions import IsSeller
 class UserCreateView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
 
 
@@ -28,15 +28,16 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data,context= {'request' :request})
         if serializer.is_valid():
             user = serializer.validated_data['user']
             username = serializer.validated_data['username']
-            user_type = serializer.validated_data['user_type']
+            password = serializer.validated_data['password']
             context = {
                 'message': 'Login successful',
                 'username': username,
-                'user_type' : user_type
+
+
 
             }
             return Response(context, status=status.HTTP_200_OK)
@@ -107,14 +108,26 @@ class OnlineShopCreateView(generics.CreateAPIView):
     permission_classes = [IsSeller]
 
 
-
-class ProductCreateView(generics.ListCreateAPIView):
+#
+# class ProductCreateView(generics.ListCreateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#
+#
+# class ProductListView(generics.ListAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#
+#
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    # permission_classes = [IsAdminUser]
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
-class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
