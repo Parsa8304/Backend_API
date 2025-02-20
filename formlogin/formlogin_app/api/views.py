@@ -1,35 +1,26 @@
-from rest_framework import status , generics , permissions
+from rest_framework import status ,  permissions
 from rest_framework.response import Response
 from .serializers import (CustomUserSerializer, SellerSerializer,ProductSerializer,
                           OnlineShopSerializer,GamerSerializer,LevelSerializer,
-                          PointsSerializer ,InvestorSerializer , LoginSerializer)
+                          PointsSerializer ,InvestorSerializer , LoginSerializer, ProductAnalyticsSerializer)
 
 from formlogin_app.models import (CustomUser,  Seller, Investor,
                                   Gamer, Product, OnlineShop, Level, Points)
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
-from .permissions import IsSeller
+from .permissions import IsSellerOrRead
 from rest_framework import viewsets
-
-# Todo : comment the authorization stuff in views
-# so we caen test the cod
-
-# User Create view
-class UserCreateView(generics.CreateAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = [AllowAny]
+from ..models import ProductAnalytics
 
 
 
-class LoginAPIView(APIView):
+class LoginViewSet(viewsets.ViewSet):
     """
     API view for user login.
     """
     serializer_class = LoginSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data,context= {'request' :request})
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             user = serializer.validated_data['user']
             username = serializer.validated_data['username']
@@ -37,9 +28,6 @@ class LoginAPIView(APIView):
             context = {
                 'message': 'Login successful',
                 'username': username,
-
-
-
             }
             return Response(context, status=status.HTTP_200_OK)
 
@@ -48,90 +36,88 @@ class LoginAPIView(APIView):
 
 
 #Seeing all users
-class UserListView(generics.ListAPIView):
+
+class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset , many = True)
-        return Response(serializer.data)
-
-
-#seeing Only one user
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permissions_classes = [IsAdminUser]
 
 #Creating account for any type of user
 ###############################################
 
-class SellerListCreateView(generics.ListCreateAPIView):
+class SellerViewSet(viewsets.ModelViewSet):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
 
 
-class InvestorListCreateView(generics.ListCreateAPIView):
-    """
-    API view for listing and creating investors.
-    """
+class InvestorViewSet(viewsets.ModelViewSet):
     queryset = Investor.objects.all()
     serializer_class = InvestorSerializer
 
 
-class GamerListCreateView(generics.ListCreateAPIView):
-    """
-    API view for listing and creating gamers.
-    """
+class GamerViewSet(viewsets.ModelViewSet):
     queryset = Gamer.objects.all()
     serializer_class = GamerSerializer
 
-
-
-
 #adding products
+# only if user = seller
 ###################################3
 
-class OnlineShopListView(generics.ListCreateAPIView):
+class OnlineShopViewSet(viewsets.ModelViewSet):
     queryset = OnlineShop.objects.all()
     serializer_class = OnlineShopSerializer
-
-    def get(self, request, *args, **kwargs ):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)  
-        return Response(serializer.data)
-
-
-class OnlineShopCreateView(generics.CreateAPIView):
-    queryset = OnlineShop.objects.all()
-    serializer_class = OnlineShopSerializer
-    permission_classes = [IsSeller]
-
-
-#
-# class ProductCreateView(generics.ListCreateAPIView):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
-#
-#
-# class ProductListView(generics.ListAPIView):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
-#
-# Todo : this view shold be tested tommorow
-
+    permissions_classes = [IsSellerOrRead]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsSellerOrRead]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        analytics = ProductAnalytics.objects.all()
+        return Response({
+            'products': serializer.data,
+            'analytics': analytics
+        })
+
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
+
+# get data for the analytics fo the product ->
+
+    def get_analytics_data(self):
+        analytics_data = []
+        for product in self.queryset:
+            analytics = ProductAnalytics.objects.filter(product=product).first()
+            if analytics:
+                analytics_data.append({
+                    'product_id': product.id,
+                    'title': product.title,
+                    'views': analytics.views,
+                    'clicks': analytics.clicks,
+                    'last_updated': analytics.last_updated,
+                })
+            else:
+                analytics_data.append({
+                    'product_id': product.id,
+                    'title': product.title,
+                    'views': 0,
+                    'clicks': 0,
+                    'last_updated': None,
+                })
+        return analytics_data
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        analytics_data = self.get_analytics_data()
+        return Response({
+            'product': serializer.data,
+            'analytics': analytics_data
+        })
+
+#####################################################

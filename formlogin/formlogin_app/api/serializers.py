@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from formlogin_app.models import (CustomUser, Seller, Investor, Gamer, Product, OnlineShop, Level, Points)
+from formlogin_app.models import (CustomUser, Seller, Investor,ProductAnalytics, Gamer, Product, OnlineShop, Level, Points)
+
+
 
 
 #LoginSerializer for login action
@@ -34,10 +36,17 @@ class LoginSerializer(serializers.ModelSerializer):
 #Product and Seller nested serializers
 class ProductSerializer(serializers.ModelSerializer):
     onlineshop_name = serializers.CharField(source='online_shop.name', read_only=True)
+    product_analytics = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_product_analytics(self, obj):
+        analytics = ProductAnalytics.objects.filter(product=obj).first()
+        if analytics:
+            return ProductAnalyticsSerializer(analytics).data
+        return None
 
 class OnlineShopSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
@@ -63,6 +72,11 @@ class SellerSerializer(serializers.ModelSerializer):
     def get_online_shop(self, obj):
         online_shops = obj.onlineshop_set.all()
         return OnlineShopSerializer(online_shops, many=True).data
+
+class ProductAnalyticsSerializer(serializers.Serializer):
+    class Meta:
+        model = ProductAnalytics
+        fields = '__all__'
 
 ###################################################
 #Gamer serializer  and it's properties
@@ -102,11 +116,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ['username','password', 'user_type', 'email', 'seller', 'gamer', 'investor']
 
 
     def create(self, validated_data):
-        user = User(**validated_data)
+        user = CustomUser(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
