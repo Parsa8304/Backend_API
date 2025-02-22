@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
 from .permissions import IsSellerOrRead
 from rest_framework import viewsets
 from ..models import ProductAnalytics
-
+from rest_framework.views import APIView
 
 
 class LoginViewSet(viewsets.ViewSet):
@@ -69,6 +69,8 @@ class OnlineShopViewSet(viewsets.ModelViewSet):
     permissions_classes = [IsSellerOrRead]
 
 
+
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -77,29 +79,35 @@ class ProductViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-        analytics = ProductAnalytics.objects.all()
+
+
+        analytics_data = self.get_analytics_data(queryset)
+
         return Response({
             'products': serializer.data,
-            'analytics': analytics
+            'analytics': analytics_data,
         })
-
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
 
-# get data for the analytics fo the product ->
-
-    def get_analytics_data(self):
+    def get_analytics_data(self, queryset):
         analytics_data = []
-        for product in self.queryset:
-            analytics = ProductAnalytics.objects.filter(product=product).first()
-            if analytics:
+        product_ids = queryset.values_list('id', flat=True)
+        analytics = ProductAnalytics.objects.filter(product__in=product_ids)
+
+
+        analytics_dict = {analytics.product.id: analytics for analytics in analytics}
+
+        for product in queryset:
+            analytics_item = analytics_dict.get(product.id)
+            if analytics_item:
                 analytics_data.append({
                     'product_id': product.id,
                     'title': product.title,
-                    'views': analytics.views,
-                    'clicks': analytics.clicks,
-                    'last_updated': analytics.last_updated,
+                    'views': analytics_item.views,
+                    'clicks': analytics_item.clicks,
+                    'last_updated': analytics_item.last_updated,
                 })
             else:
                 analytics_data.append({
@@ -114,10 +122,39 @@ class ProductViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        analytics_data = self.get_analytics_data()
+
+
+        analytics = ProductAnalytics.objects.filter(product=instance).first()
+        analytics_data = {
+            'product_id': instance.id,
+            'title': instance.title,
+            'views': analytics.views if analytics else 0,
+            'clicks': analytics.clicks if analytics else 0,
+            'last_updated': analytics.last_updated if analytics else None,
+        }
+
         return Response({
             'product': serializer.data,
-            'analytics': analytics_data
+            'analytics': analytics_data,
         })
 
+
 #####################################################
+
+
+
+class TrackClickView(APIView):
+    def post(self, request):
+        product_id = request.data.get('product_id')
+        analytics, created = ProductAnalytics.objects.get_or_create(product_id=product_id)
+        analytics.click_count += 1
+        analytics.save()
+        return Response({'status': 'success', 'click_count': analytics.click_count}, status=status.HTTP_200_OK)
+
+class TrackViewView(APIView):
+    def post(self, request):
+        product_id = request.data.get('product_id')
+        analytics, created = ProductAnalytics.objects.get_or_create(product_id=product_id)
+        analytics.view_count += 1
+        analytics.save()
+        return Response({'status': 'success', 'view_count': analytics.view_count}, status=status.HTTP_200_OK)

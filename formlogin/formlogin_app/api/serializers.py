@@ -34,6 +34,12 @@ class LoginSerializer(serializers.ModelSerializer):
 
 ############################################################
 #Product and Seller nested serializers
+class ProductAnalyticsSerializer(serializers.Serializer):
+    class Meta:
+        model = ProductAnalytics
+        fields = '__all__'
+
+
 class ProductSerializer(serializers.ModelSerializer):
     onlineshop_name = serializers.CharField(source='online_shop.name', read_only=True)
     product_analytics = serializers.SerializerMethodField()
@@ -47,6 +53,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if analytics:
             return ProductAnalyticsSerializer(analytics).data
         return None
+
 
 class OnlineShopSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
@@ -73,10 +80,6 @@ class SellerSerializer(serializers.ModelSerializer):
         online_shops = obj.onlineshop_set.all()
         return OnlineShopSerializer(online_shops, many=True).data
 
-class ProductAnalyticsSerializer(serializers.Serializer):
-    class Meta:
-        model = ProductAnalytics
-        fields = '__all__'
 
 ###################################################
 #Gamer serializer  and it's properties

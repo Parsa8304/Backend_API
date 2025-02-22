@@ -15,8 +15,11 @@ router.register('onlineshop', OnlineShopViewSet)
 router.register('users', UserViewSet)
 router.register('login', LoginViewSet, basename='login')
 
+
 #######################################
 
 urlpatterns = [
     path("", include(router.urls)),
+    path('track-click/', TrackClickView.as_view(), name='track-click'),
+    path('track-view/', TrackViewView.as_view(), name='track-view'),
 ]
