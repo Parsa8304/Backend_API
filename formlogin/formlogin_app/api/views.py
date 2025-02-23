@@ -7,7 +7,7 @@ from .serializers import (CustomUserSerializer, SellerSerializer,ProductSerializ
 from formlogin_app.models import (CustomUser,  Seller, Investor,
                                   Gamer, Product, OnlineShop, Level, Points)
 from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
-from .permissions import IsSellerOrRead
+from .permissions import IsSellerOrRead , IsSeller
 from rest_framework import viewsets
 from ..models import ProductAnalytics
 from rest_framework.views import APIView
@@ -66,7 +66,12 @@ class GamerViewSet(viewsets.ModelViewSet):
 class OnlineShopViewSet(viewsets.ModelViewSet):
     queryset = OnlineShop.objects.all()
     serializer_class = OnlineShopSerializer
-    permissions_classes = [IsSellerOrRead]
+    permission_classes = [IsSeller]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
 
 
 
@@ -74,13 +79,11 @@ class OnlineShopViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsSellerOrRead]
+    permission_classes = [IsSeller]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
-
-
         analytics_data = self.get_analytics_data(queryset)
 
         return Response({

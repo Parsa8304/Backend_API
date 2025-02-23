@@ -40,3 +40,10 @@ class IsSellerOrRead(permissions.BasePermission):
             return True
         return request.user.is_authenticated and request.user.user_type == 'seller'
 
+
+class IsSeller(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (request.user.is_authenticated and
+            getattr(request.user, 'userprofile', None) and
+            request.user.userprofile.is_seller)
+

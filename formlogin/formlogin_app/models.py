@@ -35,7 +35,7 @@ class OnlineShop(models.Model):
     url = models.URLField()
     description = models.TextField()
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
-    customer = models.CharField(max_length=100, default=None)
+    # customer = models.CharField(max_length=100, default=None , null = True)
     sales = models.FloatField(default=0.00)
     logo = models.ImageField(upload_to='logo/',default=None)
 
