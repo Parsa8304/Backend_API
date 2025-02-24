@@ -1,0 +1,39 @@
+Login Backend API:
+This a document file for the login backend api which gives you enough information
+for calling and using the API.
+
+Run:
+ In order to run the project just move to 'formlogin' directory and
+  execute "python manage.py runserver" in he terminal!
+
+
+______________________________________________________________________
+Apps:
+This project contains 2 apps (formlogin_app , user_app), which are
+connected to each other through the settings.py and different modules throughout the project.
+
+modules such as: models.py , views.py , urls,py , serializers.py.
+
+
+----> user_app:
+This app only contains the CutomUser models and its children(Seller, Investor , Gamer).
+in the api directory, you can see the views for registration and logout actions , however
+for the login process I have used the JWT authentication .
+
+you can also have access the urls of this app through the 'accounts/some other url'
+The serializers.py is only used for registration as we don't need to use or implement the custom login
+process(we use JWT)
+
+
+
+---->formlogin_app:
+ This app performs the CRUD operations for the onlineshops and products
+
+ There is also a permision.py file as limits the access to the urls and views,
+ e.g. you cant create an online shop if you are not a Seller.Or you can't see the user list if you are not
+ the admin .
+
+ #Tobe continued...
+
+
+

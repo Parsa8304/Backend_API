@@ -2,36 +2,43 @@ from rest_framework import status ,  permissions
 from rest_framework.response import Response
 from .serializers import (CustomUserSerializer, SellerSerializer,ProductSerializer,
                           OnlineShopSerializer,GamerSerializer,LevelSerializer,
-                          PointsSerializer ,InvestorSerializer , LoginSerializer, ProductAnalyticsSerializer)
+                          PointsSerializer ,InvestorSerializer ,  ProductAnalyticsSerializer)
 
 from formlogin_app.models import (CustomUser,  Seller, Investor,
                                   Gamer, Product, OnlineShop, Level, Points)
 from rest_framework.permissions import IsAuthenticated ,IsAdminUser , AllowAny
-from .permissions import IsSellerOrRead , IsSeller
+from .permissions import IsSellerOrRead , IsSeller , IsAdminOrRead
 from rest_framework import viewsets
 from ..models import ProductAnalytics
 from rest_framework.views import APIView
 
 
-class LoginViewSet(viewsets.ViewSet):
-    """
-    API view for user login.
-    """
-    serializer_class = LoginSerializer
 
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-            context = {
-                'message': 'Login successful',
-                'username': username,
-            }
-            return Response(context, status=status.HTTP_200_OK)
+############################################
+#This is the old login view (I used viewset for login which is replaced by jwt authentication in 'user_app/api/urls'
+# class LoginViewSet(viewsets.ViewSet):
+#     """
+#     API view for user login.
+#     """
+#     serializer_class = LoginSerializer
+#
+#     def create(self, request):
+#         serializer = self.serializer_class(data=request.data, context={'request': request})
+#         if serializer.is_valid():
+#             user = serializer.validated_data['user']
+#             username = serializer.validated_data['username']
+#             password = serializer.validated_data['password']
+#             context = {
+#                 'message': 'Login successful',
+#                 'username': username,
+#             }
+#             return Response(context, status=status.HTTP_200_OK)
+#
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#This view will be removed if the jwt is approved!
+############################################
+
 
 
 
@@ -40,7 +47,7 @@ class LoginViewSet(viewsets.ViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permissions_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrRead]
 
 #Creating account for any type of user
 ###############################################
@@ -66,20 +73,16 @@ class GamerViewSet(viewsets.ModelViewSet):
 class OnlineShopViewSet(viewsets.ModelViewSet):
     queryset = OnlineShop.objects.all()
     serializer_class = OnlineShopSerializer
-    permission_classes = [IsSeller]
+    permission_classes = [IsSellerOrRead]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-
-
+        serializer.save()
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsSeller]
+    permission_classes = [IsSellerOrRead]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -145,7 +148,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 #####################################################
 
 
-
+#Does nothing at the moment
 class TrackClickView(APIView):
     def post(self, request):
         product_id = request.data.get('product_id')

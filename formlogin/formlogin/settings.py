@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
+    #my apps
     'formlogin_app',
     'rest_framework',
     'user_app'
@@ -130,8 +130,13 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+#JWT authentication ->
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+}
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKEN': True,
 }

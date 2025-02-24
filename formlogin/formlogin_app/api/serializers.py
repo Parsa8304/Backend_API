@@ -6,30 +6,30 @@ from formlogin_app.models import (CustomUser, Seller, Investor,ProductAnalytics,
 
 
 #LoginSerializer for login action
-class LoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'password']
-# error handling for invalid username or password
-    def validate(self, attrs):
-        username = attrs.get('username')
-        password = attrs.get('password')
-
-        if username and password:
-            user = authenticate(request=self.context.get('request'), username=username, password=password)
-            if not user:
-                raise serializers.ValidationError("Invalid username or password.")
-            if not user.is_active:
-                raise serializers.ValidationError("User account is inactive.")
-        else:
-            raise serializers.ValidationError("Username and password are required.")
-
-        attrs['user'] = user
-        return attrs
+# class LoginSerializer(serializers.ModelSerializer):
+#     username = serializers.CharField()
+#     password = serializers.CharField()
+#
+#
+#     class Meta:
+#         model = CustomUser
+#         fields = ['username', 'password']
+# # error handling for invalid username or password
+#     def validate(self, attrs):
+#         username = attrs.get('username')
+#         password = attrs.get('password')
+#
+#         if username and password:
+#             user = authenticate(request=self.context.get('request'), username=username, password=password)
+#             if not user:
+#                 raise serializers.ValidationError("Invalid username or password.")
+#             if not user.is_active:
+#                 raise serializers.ValidationError("User account is inactive.")
+#         else:
+#             raise serializers.ValidationError("Username and password are required.")
+#
+#         attrs['user'] = user
+#         return attrs
 
 
 ############################################################
@@ -58,15 +58,33 @@ class ProductSerializer(serializers.ModelSerializer):
 class OnlineShopSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
 
-
     class Meta:
         model = OnlineShop
         fields = ['name', 'url', 'description', 'seller', 'products']
+
+    def create(self, validated_data):
+        request = self.context['request']
+        user = request.user
+
+        # Check if the user is a seller
+        if user.user_type != 'seller':
+            raise serializers.ValidationError("You must be a seller to create an online shop.")
+
+        # Get or create the Seller instance
+        seller, created = Seller.objects.get_or_create(user=user)
+
+        # Remove the seller from validated_data to avoid conflict
+        validated_data.pop('seller', None)  # Safely remove 'seller' if it exists
+
+        # Create the OnlineShop instance
+        online_shop = OnlineShop.objects.create(seller=seller, **validated_data)
+        return online_shop
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['id'] = instance.id
         return representation
+
 
 class SellerSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
