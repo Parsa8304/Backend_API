@@ -31,7 +31,7 @@ process(we use JWT)
 
  There is also a permision.py file as limits the access to the urls and views,
  e.g. you cant create an online shop if you are not a Seller.Or you can't see the user list if you are not
- the admin .
+ the admin ..
 
  #Tobe continued...
 
