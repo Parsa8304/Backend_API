@@ -14,6 +14,7 @@ connected to each other through the settings.py and different modules throughout
 
 modules such as: models.py , views.py , urls,py , serializers.py.
 
+....
 
 ----> user_app:
 This app only contains the CutomUser models and its children(Seller, Investor , Gamer).
