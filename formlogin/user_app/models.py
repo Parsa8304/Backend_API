@@ -43,6 +43,7 @@ class Gamer(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     isseller = models.BooleanField(default=False)
+    isgamer = models.BooleanField(default = False)
 
     def __str__(self):
         return f"{self.user.username} - {self.user.user_type}"

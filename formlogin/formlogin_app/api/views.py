@@ -164,3 +164,5 @@ class TrackViewView(APIView):
         analytics.view_count += 1
         analytics.save()
         return Response({'status': 'success', 'view_count': analytics.view_count}, status=status.HTTP_200_OK)
+    
+    

@@ -66,17 +66,17 @@ class OnlineShopSerializer(serializers.ModelSerializer):
         request = self.context['request']
         user = request.user
 
-        # Check if the user is a seller
+
         if user.user_type != 'seller':
             raise serializers.ValidationError("You must be a seller to create an online shop.")
 
-        # Get or create the Seller instance
+
         seller, created = Seller.objects.get_or_create(user=user)
 
-        # Remove the seller from validated_data to avoid conflict
-        validated_data.pop('seller', None)  # Safely remove 'seller' if it exists
 
-        # Create the OnlineShop instance
+        validated_data.pop('seller', None)
+
+
         online_shop = OnlineShop.objects.create(seller=seller, **validated_data)
         return online_shop
 

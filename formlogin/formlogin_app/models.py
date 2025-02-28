@@ -10,8 +10,6 @@ from user_app.models import Seller , Investor , Gamer , CustomUser
 ################################################################
 # Seller Properties ->
 
-
-
 class Product(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, default=1)
     title = models.CharField(max_length=100)
@@ -70,8 +68,21 @@ class Points(models.Model):
 
     def __str__(self):
         return self.user.username
+#
+class Tokens(models.Model):
+    owner = models.ForeignKey(Gamer, on_delete=models.CASCADE)
+    token_name = models.CharField(max_length=20)
+    amount = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"{self.owner.username} - {self.token_name}"
+
+
 
 ###############################################################
 #Investor Properties ->
+
+
+
 
 #Todo : update the properties of Investor class
