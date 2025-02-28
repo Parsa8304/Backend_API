@@ -4,7 +4,7 @@ for calling and using the API.
 
 Run:
  In order to run the project just move to 'formlogin' directory and
-  execute "python manage.py runserver" in he terminal!!
+  execute "python manage.py runserver" in he terminal!!!
 
 
 ______________________________________________________________________
