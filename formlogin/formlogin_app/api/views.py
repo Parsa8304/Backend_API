@@ -11,8 +11,8 @@ from .permissions import IsSellerOrRead , IsSeller , IsAdminOrRead
 from rest_framework import viewsets
 from ..models import ProductAnalytics
 from rest_framework.views import APIView
-
-
+from .pagination import CustomPagination
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 
 ############################################
 #This is the old login view (I used viewset for login which is replaced by jwt authentication in 'user_app/api/urls'
@@ -74,6 +74,8 @@ class OnlineShopViewSet(viewsets.ModelViewSet):
     queryset = OnlineShop.objects.all()
     serializer_class = OnlineShopSerializer
     permission_classes = [IsSellerOrRead]
+    pagination_class = CustomPagination
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     def perform_create(self, serializer):
         serializer.save()

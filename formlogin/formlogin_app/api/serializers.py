@@ -119,7 +119,7 @@ class GamerSerializer(serializers.ModelSerializer):
         model = Gamer
         fields = ['user', 'level', 'points']
 
-#########################################################
+######################################################
 #Investor stuff
 
 class InvestorSerializer(serializers.ModelSerializer):
